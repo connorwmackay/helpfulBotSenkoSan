@@ -1,13 +1,19 @@
 from discord.ext import commands
-from cogs import Command
+from cogs import Cog
+from googleapiclient.discovery import build
 import praw
 import random
+import os
+import httplib2
 
 random.seed()
 
-class Memes(commands.Cog):
+
+class Anime(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.http = httplib2.Http(cache=".cache")
+        self.gservice = build('youtube', 'v3', http=self.http, developerKey=os.getenv('YOUTUBE_API_KEY'))
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -63,5 +69,26 @@ class Memes(commands.Cog):
         else:
             await ctx.send("No meme found")
 
+    @commands.command(name="op")
+    async def find_op(self, ctx, anime_name: str, season: int = 1):
+        """
+        Return a youtube video for the OP of the anime given.
+        """
+        await ctx.send("Finding op...")
+        youtube_list_request = self.gservice.search().list(part="snippet", q="{0} op {1}".format(anime_name, season))
+        response = youtube_list_request.execute(http=self.http)
+        await ctx.send("https://www.youtube.com/watch?v={0}".format(response["items"][0]["id"]["videoId"]))
+
+    @commands.command(name="ed")
+    async def find_ed(self, ctx, anime_name: str, season: int = 1):
+        """
+        Return a youtube video for the ED of the anime given.
+        """
+        await ctx.send("Finding ed...")
+        youtube_list_request = self.gservice.search().list(part="snippet", q="{0} ed {1}".format(anime_name, season))
+        response = youtube_list_request.execute(http=self.http)
+        await ctx.send("https://www.youtube.com/watch?v={0}".format(response["items"][0]["id"]["videoId"]))
+
+
 def setup(bot):
-    bot.add_cog(Memes(bot))
+    bot.add_cog(Anime(bot))
