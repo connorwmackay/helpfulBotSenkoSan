@@ -27,7 +27,7 @@ class Anime(commands.Cog):
         both optional parameters, but to use Time Filter Sort By must
         always be present."""
         await ctx.send("Finding meme...")
-        subreddit = await Command.reddit.subreddit('Animemes')
+        subreddit = await Cog.reddit.subreddit('Animemes')
 
         is_invalid = False
 
