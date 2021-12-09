@@ -77,17 +77,45 @@ class Anime(commands.Cog):
         await ctx.send("Finding op...")
         youtube_list_request = self.gservice.search().list(part="snippet", q="{0} op {1}".format(anime_name, season))
         response = youtube_list_request.execute(http=self.http)
-        await ctx.send("https://www.youtube.com/watch?v={0}".format(response["items"][0]["id"]["videoId"]))
+        for video in response["items"]:
+            youtube_video_request = self.gservice.videos().list(part="status,player", id=video["id"]["videoId"])
+            video_response = youtube_video_request.execute(http=self.http)
+            print(video_response["items"][0])
+            if video_response["items"][0]["status"]["embeddable"]:
+                await ctx.send("https://www.youtube.com/watch?v={0}".format(video["id"]["videoId"]))
+                return
 
     @commands.command(name="ed")
     async def find_ed(self, ctx, anime_name: str, season: int = 1):
         """
         Return a youtube video for the ED of the anime given.
+        :param ctx:
+        :param anime_name:
+        :param season:
+        :return:
         """
         await ctx.send("Finding ed...")
         youtube_list_request = self.gservice.search().list(part="snippet", q="{0} ed {1}".format(anime_name, season))
         response = youtube_list_request.execute(http=self.http)
-        await ctx.send("https://www.youtube.com/watch?v={0}".format(response["items"][0]["id"]["videoId"]))
+        for video in response["items"]:
+            youtube_video_request = self.gservice.videos().list(part="status,player", id=video["id"]["videoId"])
+            video_response = youtube_video_request.execute(http=self.http)
+            print(video_response["items"][0])
+            if video_response["items"][0]["status"]["embeddable"]:
+                await ctx.send("https://www.youtube.com/watch?v={0}".format(video["id"]["videoId"]))
+                return
+
+    @commands.command(name="play")
+    async def play(self, ctx, anime_name: str, op_or_ed: str = "op", season: int = 1 ):
+        """
+        Play a music video on the Senko Music Lounge vc
+        :param ctx:
+        :param anime_name:
+        :param op_or_ed:
+        :param season:
+        :return:
+        """
+
 
 
 def setup(bot):
