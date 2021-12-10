@@ -1,6 +1,7 @@
 from pytube import YouTube
 from pytube import Stream
 import os
+import glob
 import ffmpeg
 
 class YoutubeVideo:
@@ -13,24 +14,17 @@ class YoutubeVideo:
         streams = self.yt_video.fmt_streams
         target_stream: Stream = None
 
+        print(streams)
+
         for stream in streams:
-            if stream.type == 'audio':
+            if stream.type == 'audio' and stream.mime_type=='audio/mp4':
                 target_stream = stream
                 break
         else:
             target_stream = streams[0]
 
-        file_name = "{0}.mp4".format(self.yt_video.title)
-
-        new_file_name = ""
-        for file_name_chunk in file_name.split(' '):
-            new_file_name += '_' + file_name_chunk
-        file_name = new_file_name
-
-        new_file_name = ""
-        for file_name_chunk in file_name.split('&'):
-            new_file_name += '_' + file_name_chunk
-        file_name = "Downloads/" + new_file_name
+        file_name = "{0}.mp4".format(self.yt_video.video_id)
+        file_name = "downloads/" + file_name
         print(file_name)
 
         if os.path.isfile(file_name):

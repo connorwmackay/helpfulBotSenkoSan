@@ -5,8 +5,10 @@ from googleapiclient.discovery import build
 import praw
 import random
 import os
+import glob
 import httplib2
 from lounge import lounge
+import shutil
 
 random.seed()
 
@@ -61,14 +63,22 @@ class SenkoLounge(commands.Cog):
                 except:
                     voice_client = self.bot.voice_clients[0]
 
-                video = lounge.YoutubeVideo(url)
-                video.start_download()
-                print("next")
-                await ctx.send("Downloading video...")
-                audio_source = discord.FFmpegPCMAudio(video.file_path)
                 if voice_client.is_playing():
                     voice_client.stop()
+                else:
+                    if os.name == 'nt':
+                        shutil.rmtree("./downloads")
+                        os.mkdir('./downloads')
+                    else:
+                        files = glob.glob("./downloads")
+                        for file in files:
+                            os.remove(file)
 
+                video = lounge.YoutubeVideo(url)
+                video.start_download()
+
+                await ctx.send("Downloading video...")
+                audio_source = discord.FFmpegPCMAudio(video.file_path)
                 voice_client.play(audio_source)
                 await ctx.send("Playing music...")
 
