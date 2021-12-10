@@ -66,6 +66,9 @@ class SenkoLounge(commands.Cog):
                 print("next")
                 await ctx.send("Downloading video...")
                 audio_source = discord.FFmpegPCMAudio(video.file_path)
+                if voice_client.is_playing():
+                    voice_client.stop()
+
                 voice_client.play(audio_source)
                 await ctx.send("Playing music...")
 
