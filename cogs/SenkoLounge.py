@@ -21,7 +21,7 @@ class SenkoLounge(commands.Cog):
         pass
 
     @commands.command(name="create")
-    async def create_lounge(self, ctx: commands.Context, role_name: str):
+    async def create_lounge(self, ctx: commands.Context):
         guild: discord.Guild = self.bot.get_guild(ctx.guild.id)
         for channel in guild.channels:
             if channel.name == lounge_name:
@@ -33,9 +33,17 @@ class SenkoLounge(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-        if after.channel is not None:
-            if after.channel.name == lounge_name and not after.mute:
-                await member.edit(mute=True)
+        try: # FIXME: Doesn't work when switching from one voice channel to another
+            if after.channel is not None:
+                # Muting / Unmuting
+                if after.channel.name == lounge_name and not after.mute:
+                    await member.edit(mute=True)
+                elif str(after.channel.name) != lounge_name and after.mute:
+                    await member.edit(mute=False)
+        except:
+            print("A voice-related error occured.")
+
+
 
     @commands.command(name="play")
     async def play(self):
