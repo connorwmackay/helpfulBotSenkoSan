@@ -50,10 +50,10 @@ class SenkoLounge(commands.Cog):
             print("A voice-related error occured.")
 
     @commands.command(name="play")
-    async def play(self, ctx, anime_name, type="op", season=1):
+    async def play(self, ctx, anime_name, type="op", season="1"):
         #FIXME: Check if already playing audio, if so stop playing then play new music
 
-        youtube_list_request = self.gservice.search().list(part="snippet", q="{0} {2} {1}".format(anime_name, season, anime_name))
+        youtube_list_request = self.gservice.search().list(part="snippet", q="{0} {2} {1}".format(anime_name, season, str(type)))
         response = youtube_list_request.execute(http=self.http)
 
         url = ""
@@ -61,8 +61,11 @@ class SenkoLounge(commands.Cog):
         for video in response["items"]:
             youtube_video_request = self.gservice.videos().list(part="status,player", id=video["id"]["videoId"])
             video_response = youtube_video_request.execute(http=self.http)
-            if video_response["items"][0]["status"]["embeddable"]:
+            print(video_response["items"][0]["kind"])
+            if video_response["items"][0]["status"]["embeddable"] and video_response["items"][0]["kind"] == "youtube#video":
+                print("yes")
                 url = "https://www.youtube.com/watch?v={0}".format(video["id"]["videoId"])
+                break
 
         voice_clients: discord.VoiceClient = self.bot.voice_clients
         voice_client = None
