@@ -50,8 +50,20 @@ class SenkoLounge(commands.Cog):
             print("A voice-related error occured.")
 
     @commands.command(name="play")
-    async def play(self, ctx, url):
+    async def play(self, ctx, anime_name, type="op", season=1):
         #FIXME: Check if already playing audio, if so stop playing then play new music
+
+        youtube_list_request = self.gservice.search().list(part="snippet", q="{0} {2} {1}".format(anime_name, season, anime_name))
+        response = youtube_list_request.execute(http=self.http)
+
+        url = ""
+
+        for video in response["items"]:
+            youtube_video_request = self.gservice.videos().list(part="status,player", id=video["id"]["videoId"])
+            video_response = youtube_video_request.execute(http=self.http)
+            if video_response["items"][0]["status"]["embeddable"]:
+                url = "https://www.youtube.com/watch?v={0}".format(video["id"]["videoId"])
+
         voice_clients: discord.VoiceClient = self.bot.voice_clients
         voice_client = None
 
@@ -66,13 +78,8 @@ class SenkoLounge(commands.Cog):
                 if voice_client.is_playing():
                     voice_client.stop()
                 else:
-                    if os.name == 'nt':
-                        shutil.rmtree("./downloads")
-                        os.mkdir('./downloads')
-                    else:
-                        files = glob.glob("./downloads")
-                        for file in files:
-                            os.remove(file)
+                    shutil.rmtree("./downloads")
+                    os.mkdir('./downloads')
 
                 video = lounge.YoutubeVideo(url)
                 video.start_download()
