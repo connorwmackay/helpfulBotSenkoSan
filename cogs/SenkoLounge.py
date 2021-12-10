@@ -6,6 +6,7 @@ import praw
 import random
 import os
 import httplib2
+from lounge import lounge
 
 random.seed()
 
@@ -37,17 +38,36 @@ class SenkoLounge(commands.Cog):
             if after.channel is not None:
                 # Muting / Unmuting
                 if after.channel.name == lounge_name and not after.mute:
-                    await member.edit(mute=True)
+                    if member.id != self.bot.user.id:
+                        await member.edit(mute=True)
+                    else:
+                        await member.edit(mute=False)
                 elif str(after.channel.name) != lounge_name and after.mute:
                     await member.edit(mute=False)
         except:
             print("A voice-related error occured.")
 
-
-
     @commands.command(name="play")
-    async def play(self):
-        pass
+    async def play(self, ctx, url):
+        #FIXME: Check if already playing audio, if so stop playing then play new music
+        voice_clients: discord.VoiceClient = self.bot.voice_clients
+        voice_client = None
+
+        guild: discord.Guild = self.bot.get_guild(ctx.guild.id)
+        for channel in guild.channels:
+            if channel.name == lounge_name:
+                try:
+                    voice_client = await channel.connect(reconnect=True)
+                except:
+                    voice_client = self.bot.voice_clients[0]
+
+                video = lounge.YoutubeVideo(url)
+                video.start_download()
+                print("next")
+                await ctx.send("Downloading video...")
+                audio_source = discord.FFmpegPCMAudio(video.file_path)
+                voice_client.play(audio_source)
+                await ctx.send("Playing music...")
 
 
 def setup(bot):
