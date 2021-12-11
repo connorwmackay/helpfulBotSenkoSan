@@ -1,3 +1,4 @@
+import pytube
 from pytube import YouTube
 from pytube import Stream
 import os
@@ -5,9 +6,12 @@ import glob
 import ffmpeg
 
 class YoutubeVideo:
-    def __init__(self, url):
-        self.url = str(url)
-        self.yt_video: YouTube = YouTube(self.url)
+    def __init__(self, search_term):
+        self.search_term = str(search_term)
+        try:
+            self.yt_video = pytube.Search(search_term).results[0]
+        except:
+            pass
         self.file_path = ""
 
     def start_download(self):
@@ -17,7 +21,7 @@ class YoutubeVideo:
         print(streams)
 
         for stream in streams:
-            if stream.type == 'audio' and stream.mime_type=='audio/mp4':
+            if stream.type == 'audio' and stream.mime_type == 'audio/mp4':
                 target_stream = stream
                 break
         else:

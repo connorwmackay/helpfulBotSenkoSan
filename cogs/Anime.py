@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 import praw
 import random
 import os
-import httplib2
+import pytube
 
 random.seed()
 
@@ -12,8 +12,6 @@ random.seed()
 class Anime(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.http = httplib2.Http(cache=".cache")
-        self.gservice = build('youtube', 'v3', http=self.http, developerKey=os.getenv('YOUTUBE_API_KEY'))
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -70,23 +68,21 @@ class Anime(commands.Cog):
             await ctx.send("No meme found")
 
     @commands.command(name="op")
-    async def find_op(self, ctx, anime_name: str, season: int = 1):
+    async def find_op(self, ctx, anime_name: str, season: str = "1"):
         """
         Return a youtube video for the OP of the anime given.
         """
         await ctx.send("Finding op...")
-        youtube_list_request = self.gservice.search().list(part="snippet", q="{0} op {1}".format(anime_name, season))
-        response = youtube_list_request.execute(http=self.http)
+        yt_video: pytube.YouTube = None
+        try:
+            yt_video: pytube.YouTube = pytube.Search(anime_name + " op " + season).results[0]
+        except:
+            pass
 
-        for video in response["items"]:
-            youtube_video_request = self.gservice.videos().list(part="status,player", id=video["id"]["videoId"])
-            video_response = youtube_video_request.execute(http=self.http)
-            if video_response["items"][0]["status"]["embeddable"]:
-                await ctx.send("https://www.youtube.com/watch?v={0}".format(video["id"]["videoId"]))
-                return
+        await ctx.send("{0}".format(yt_video.watch_url))
 
     @commands.command(name="ed")
-    async def find_ed(self, ctx, anime_name: str, season: int = 1):
+    async def find_ed(self, ctx, anime_name: str, season: str = "1"):
         """
         Return a youtube video for the ED of the anime given.
         :param ctx:
@@ -95,15 +91,14 @@ class Anime(commands.Cog):
         :return:
         """
         await ctx.send("Finding ed...")
-        youtube_list_request = self.gservice.search().list(part="snippet", q="{0} ed {1}".format(anime_name, season))
-        response = youtube_list_request.execute(http=self.http)
 
-        for video in response["items"]:
-            youtube_video_request = self.gservice.videos().list(part="status,player", id=video["id"]["videoId"])
-            video_response = youtube_video_request.execute(http=self.http)
-            if video_response["items"][0]["status"]["embeddable"]:
-                await ctx.send("https://www.youtube.com/watch?v={0}".format(video["id"]["videoId"]))
-                return
+        yt_video: pytube.YouTube = None
+        try:
+            yt_video: pytube.YouTube = pytube.Search(anime_name + " ed " + season).results[0]
+        except:
+            pass
+
+        await ctx.send("{0}".format(yt_video.watch_url))
 
 
 def setup(bot):

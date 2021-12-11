@@ -17,8 +17,6 @@ lounge_name = "Senko's Music Lounge"
 class SenkoLounge(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
-        self.http = httplib2.Http(cache=".cache")
-        self.gservice = build('youtube', 'v3', http=self.http, developerKey=os.getenv('YOUTUBE_API_KEY'))
 
     def get_random_video(self):
         pass
@@ -51,21 +49,14 @@ class SenkoLounge(commands.Cog):
 
     @commands.command(name="play")
     async def play(self, ctx, anime_name, type="op", season="1"):
-        #FIXME: Check if already playing audio, if so stop playing then play new music
-
-        youtube_list_request = self.gservice.search().list(part="snippet", q="{0} {2} {1}".format(anime_name, season, str(type)))
-        response = youtube_list_request.execute(http=self.http)
-
-        url = ""
-
-        for video in response["items"]:
-            youtube_video_request = self.gservice.videos().list(part="status,player", id=video["id"]["videoId"])
-            video_response = youtube_video_request.execute(http=self.http)
-            print(video_response["items"][0]["kind"])
-            if video_response["items"][0]["status"]["embeddable"] and video_response["items"][0]["kind"] == "youtube#video":
-                print("yes")
-                url = "https://www.youtube.com/watch?v={0}".format(video["id"]["videoId"])
-                break
+        """
+        Play an OP / ED in Senko's Music Lounge.
+        :param ctx:
+        :param anime_name:
+        :param type:
+        :param season:
+        :return:
+        """
 
         voice_clients: discord.VoiceClient = self.bot.voice_clients
         voice_client = None
@@ -74,7 +65,7 @@ class SenkoLounge(commands.Cog):
         for channel in guild.channels:
             if channel.name == lounge_name:
                 try:
-                    voice_client = await channel.connect(reconnect=True)
+                    voice_client = await channel.connect(reconnect=False)
                 except:
                     voice_client = self.bot.voice_clients[0]
 
@@ -84,7 +75,7 @@ class SenkoLounge(commands.Cog):
                     shutil.rmtree("./downloads")
                     os.mkdir('./downloads')
 
-                video = lounge.YoutubeVideo(url)
+                video = lounge.YoutubeVideo("{0} {1} {2}".format(anime_name, type, season))
                 video.start_download()
 
                 await ctx.send("Downloading video...")
