@@ -1,0 +1,11 @@
+asyncpraw==7.5.0
+beautifulsoup4==4.10.0
+discord.py==1.7.3
+ffmpeg_python==0.2.0
+praw==7.5.0
+python-dotenv==0.19.2
+pytube==11.0.1
+requests==2.26.0
+spyder==
+PyNaCL==1.4.0
+scrapy==2.5.1
