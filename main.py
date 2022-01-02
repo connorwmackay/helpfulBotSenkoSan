@@ -7,6 +7,7 @@ load_dotenv()
 from cogs.Anime import Anime
 from cogs.SenkoLounge import SenkoLounge
 from discord.ext import commands
+import pytube
 
 bot = commands.Bot(command_prefix="!senko ")
 

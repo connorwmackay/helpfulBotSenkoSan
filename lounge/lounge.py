@@ -9,23 +9,14 @@ class YoutubeVideo:
     def __init__(self, search_term):
         self.search_term = str(search_term)
         try:
-            self.yt_video = pytube.Search(search_term).results[0]
+            self.yt_video: pytube.YouTube = pytube.Search(search_term).results[0]
         except:
+            self.yt_video = None
             pass
         self.file_path = ""
 
     def start_download(self):
-        streams = self.yt_video.fmt_streams
-        target_stream: Stream = None
-
-        print(streams)
-
-        for stream in streams:
-            if stream.type == 'audio' and stream.mime_type == 'audio/mp4':
-                target_stream = stream
-                break
-        else:
-            target_stream = streams[0]
+        target_stream = self.yt_video.streams.get_audio_only()
 
         file_name = "{0}.mp4".format(self.yt_video.video_id)
         file_name = "downloads/" + file_name

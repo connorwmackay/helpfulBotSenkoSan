@@ -39,17 +39,24 @@ def find_closest_anime_matches(anime_name: str):
         for sub_child in child_soup.children:
             if re.search("https://myanimelist.net/anime", str(sub_child.encode('utf-8'))):
                 text = sub_child.get_text().lower()[16:]
-                print(text)
                 if re.search("watch video", text):
                     text = text.split("watch video")[0]
                 else:
-                    text = text.split("add\\")[0]
+                    text = text.split('\n')[1]
+
+                for c in text:
+                    if c == '\\':
+                        break
+                    else:
+                        new_text += c
+
+                text = new_text
 
                 match_list.append(text)
                 num_matches += 1
             elif re.search("https://myanimelist.net/manga", str(sub_child.encode('utf-8'))):
                 text = sub_child.get_text().lower()[16:]
-                text = text.split('\nadd')[0]
+                text = text.split('\n')[1]
                 new_text = ""
 
                 for c in text:
